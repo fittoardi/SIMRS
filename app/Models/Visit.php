@@ -80,6 +80,11 @@ class Visit extends Model
         return $this->hasOne(MedicalRecord::class);
     }
 
+    public function prescription(): HasOne
+    {
+        return $this->hasOne(Prescription::class);
+    }
+
     public function prescriptions(): HasMany
     {
         return $this->hasMany(Prescription::class);

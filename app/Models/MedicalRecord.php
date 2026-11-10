@@ -27,6 +27,8 @@ class MedicalRecord extends Model
         'assessment',
         'icd10_code',
         'icd10_description',
+        'secondary_icd10_code',
+        'secondary_diagnosis',
         'plan',
         'notes',
     ];
@@ -55,5 +57,15 @@ class MedicalRecord extends Model
     public function nurse(): BelongsTo
     {
         return $this->belongsTo(User::class, 'nurse_id');
+    }
+
+    public function actions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MedicalRecordAction::class);
+    }
+
+    public function prescription(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Prescription::class, 'visit_id', 'visit_id');
     }
 }
