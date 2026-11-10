@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\MedicalRecords\Schemas;
 
-use App\Models\Doctor;
 use App\Models\MedicalAction;
 use App\Models\User;
 use App\Models\Visit;
@@ -66,7 +65,7 @@ class MedicalRecordForm
                                             </div>
                                             <div>
                                                 <span class="font-extrabold uppercase tracking-wider block text-xs">PERHATIAN KLINIS — RIWAYAT ALERGI PASIEN:</span>
-                                                <span class="font-bold text-base text-rose-900 dark:text-rose-100">' . e($allergies) . '</span>
+                                                <span class="font-bold text-base text-rose-900 dark:text-rose-100">'.e($allergies).'</span>
                                                 <p class="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">Hindari peresepan obat atau zat yang memicu reaksi alergi pasien di atas.</p>
                                             </div>
                                         </div>

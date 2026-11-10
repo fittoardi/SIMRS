@@ -1,8 +1,11 @@
 <?php
 
+use App\Enums\QueueStatus;
+use App\Http\Controllers\PharmacyEtiketController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Doctor;
 use App\Models\Polyclinic;
+use App\Models\Visit;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -55,10 +58,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $familyPatientIds = $user->familyMembers()->pluck('patient_id')->toArray();
         $allPatientIds = array_unique(array_merge($patientIds, $familyPatientIds));
 
-        $activeQueues = \App\Models\Visit::with(['patient', 'doctor.polyclinic', 'polyclinic', 'queue.doctorSchedule'])
+        $activeQueues = Visit::with(['patient', 'doctor.polyclinic', 'polyclinic', 'queue.doctorSchedule'])
             ->whereIn('patient_id', $allPatientIds)
             ->whereHas('queue', function ($q) {
-                $q->whereIn('status', [\App\Enums\QueueStatus::Waiting, \App\Enums\QueueStatus::Called, \App\Enums\QueueStatus::Serving]);
+                $q->whereIn('status', [QueueStatus::Waiting, QueueStatus::Called, QueueStatus::Serving]);
             })
             ->orderBy('visit_date', 'asc')
             ->get();
@@ -80,7 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('patient.booking');
     })->name('patient.booking');
 
-    Route::get('/akun/tiket/{visit}', function (\App\Models\Visit $visit) {
+    Route::get('/akun/tiket/{visit}', function (Visit $visit) {
         return view('patient.ticket', compact('visit'));
     })->name('patient.ticket');
 
@@ -103,6 +106,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Cetak Etiket Farmasi
+    Route::get('/farmasi/etiket/{prescription}', PharmacyEtiketController::class)->name('pharmacy.etiket');
 });
 
 require __DIR__.'/auth.php';

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Prescriptions\Schemas;
 
 use App\Enums\PrescriptionStatus;
-use App\Models\Doctor;
 use App\Models\Medicine;
 use App\Models\User;
 use App\Models\Visit;
@@ -77,7 +76,7 @@ class PrescriptionForm
                             ->schema([
                                 Select::make('medicine_id')
                                     ->label('Pilih Obat')
-                                    ->options(fn () => Medicine::where('is_active', true)->get()->mapWithKeys(fn ($m) => [$m->id => "{$m->name} [Stok: {$m->stock} {$m->unit}] - Rp " . number_format($m->price, 0, ',', '.')]))
+                                    ->options(fn () => Medicine::where('is_active', true)->get()->mapWithKeys(fn ($m) => [$m->id => "{$m->name} [Stok: {$m->stock} {$m->unit}] - Rp ".number_format($m->price, 0, ',', '.')]))
                                     ->searchable()
                                     ->required()
                                     ->live()

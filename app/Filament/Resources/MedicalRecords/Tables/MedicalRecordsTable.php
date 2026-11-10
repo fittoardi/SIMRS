@@ -32,7 +32,7 @@ class MedicalRecordsTable
                     ->label('Nama Pasien')
                     ->searchable()
                     ->sortable()
-                    ->description(fn ($record) => 'NIK: ' . ($record->visit?->patient?->nik ?? '-')),
+                    ->description(fn ($record) => 'NIK: '.($record->visit?->patient?->nik ?? '-')),
 
                 TextColumn::make('doctor.name')
                     ->label('Dokter Pemeriksa')

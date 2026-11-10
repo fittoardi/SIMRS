@@ -12,7 +12,9 @@ class Icd10Catalog
     public static function all(): array
     {
         return [
+            'A01.0' => 'A01.0 - Demam Tifoid (Typhoid Fever)',
             'A09' => 'A09 - Diare & Gastroenteritis Infeksi',
+            'A90' => 'A90 - Demam Dengue (Dengue Fever)',
             'B01' => 'B01 - Varisela (Cacar Air)',
             'B05' => 'B05 - Campak (Morbili)',
             'E10' => 'E10 - Diabetes Melitus Tipe 1',
@@ -25,6 +27,7 @@ class Icd10Catalog
             'J02' => 'J02 - Faringitis Akut (Radang Tenggorokan)',
             'J03' => 'J03 - Tonsilitis Akut (Amandel)',
             'J06' => 'J06 - Infeksi Saluran Pernapasan Akut Atas (ISPA)',
+            'J06.9' => 'J06.9 - Infeksi Saluran Pernapasan Akut (ISPA)',
             'J18' => 'J18 - Pneumonia',
             'J20' => 'J20 - Bronkitis Akut',
             'J45' => 'J45 - Asma Bronkial',
@@ -43,5 +46,31 @@ class Icd10Catalog
             'R51' => 'R51 - Nyeri Kepala (Cephalea / Sakit Kepala)',
             'Z00' => 'Z00 - Pemeriksaan Kesehatan Umum (General Medical Check-Up)',
         ];
+    }
+
+    /**
+     * Cari diagnosa ICD-10 berdasarkan kode atau kata kunci deskripsi.
+     *
+     * @return array<string, string>
+     */
+    public static function search(?string $query = null): array
+    {
+        $all = static::all();
+        if (blank($query)) {
+            return $all;
+        }
+
+        return collect($all)->filter(function ($label, $code) use ($query) {
+            return str_contains(strtolower($code), strtolower($query))
+                || str_contains(strtolower($label), strtolower($query));
+        })->all();
+    }
+
+    /**
+     * Dapatkan label diagnosa berdasarkan kode ICD-10.
+     */
+    public static function label(string $code): ?string
+    {
+        return static::all()[$code] ?? null;
     }
 }

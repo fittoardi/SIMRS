@@ -36,7 +36,7 @@ class PrescriptionsTable
                     ->label('Pasien')
                     ->searchable()
                     ->sortable()
-                    ->description(fn ($record) => 'No. RM: ' . ($record->visit?->patient?->medical_record_number ?? '-')),
+                    ->description(fn ($record) => 'No. RM: '.($record->visit?->patient?->medical_record_number ?? '-')),
 
                 TextColumn::make('doctor.name')
                     ->label('Dokter Penulis')
