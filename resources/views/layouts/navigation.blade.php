@@ -41,6 +41,10 @@
                        class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->is('layar-antrean*') ? 'bg-teal-50 text-teal-700 dark:bg-gray-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-gray-700' }}">
                         Layar Antrean
                     </a>
+                    <a href="{{ url('/check-in') }}"
+                       class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->is('check-in*') ? 'bg-teal-50 text-teal-700 dark:bg-gray-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-gray-700' }}">
+                        Kiosk Check-In
+                    </a>
                     @auth
                         <a href="{{ route('patient.dashboard') }}"
                            class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->is('akun*') ? 'bg-teal-50 text-teal-700 dark:bg-gray-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-gray-700' }}">
@@ -161,6 +165,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/layar-antrean')" :active="request()->is('layar-antrean*')">
                 {{ __('Layar Antrean') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/check-in')" :active="request()->is('check-in*')">
+                {{ __('Kiosk Check-In Mandiri') }}
             </x-responsive-nav-link>
             @auth
                 <x-responsive-nav-link :href="route('patient.dashboard')" :active="request()->is('akun*')">

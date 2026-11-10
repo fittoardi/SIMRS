@@ -19,8 +19,10 @@ class Queue extends Model
         'queue_number',
         'queue_code',
         'qr_token',
+        'checked_in_at',
         'estimated_time',
         'status',
+        'call_count',
         'called_at',
         'served_at',
         'completed_at',
@@ -36,7 +38,9 @@ class Queue extends Model
     {
         return [
             'queue_number' => 'integer',
+            'call_count' => 'integer',
             'status' => QueueStatus::class,
+            'checked_in_at' => 'datetime',
             'called_at' => 'datetime',
             'served_at' => 'datetime',
             'completed_at' => 'datetime',

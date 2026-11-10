@@ -38,6 +38,10 @@ Route::get('/layar-antrean', function () {
     return view('public.queue-display');
 })->name('public.queue-display');
 
+Route::get('/check-in', function () {
+    return view('public.check-in');
+})->name('public.check-in');
+
 // Area Pasien Terautentikasi (/akun)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/akun', function () {
