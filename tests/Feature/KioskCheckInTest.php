@@ -86,3 +86,4 @@ test('kiosk shows error message if ticket is not found for today', function () {
         ->call('checkInByCode')
         ->assertSee('Jadwal kunjungan hari ini tidak ditemukan');
 });
+

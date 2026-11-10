@@ -11,6 +11,7 @@ use Livewire\Component;
 class QueueTvDisplay extends Component
 {
     public ?int $lastCalledQueueId = null;
+
     public ?string $lastCalledAt = null;
 
     public function render()
@@ -19,14 +20,14 @@ class QueueTvDisplay extends Component
 
         // 1. Antrean yang paling baru dipanggil hari ini
         $currentCall = Queue::with(['visit.patient', 'visit.doctor.polyclinic', 'visit.polyclinic', 'doctorSchedule'])
-            ->whereHas('visit', fn ($v) => $v->where('visit_date', $today))
+            ->whereHas('visit', fn ($v) => $v->whereDate('visit_date', $today))
             ->whereIn('status', [QueueStatus::Called, QueueStatus::Serving])
             ->orderByDesc('called_at')
             ->first();
 
         // Cek apakah ada panggilan baru untuk memicu audio browser event
         if ($currentCall && $currentCall->called_at) {
-            $calledKey = $currentCall->id . '_' . $currentCall->called_at->timestamp . '_' . $currentCall->call_count;
+            $calledKey = $currentCall->id.'_'.$currentCall->called_at->timestamp.'_'.$currentCall->call_count;
             if ($this->lastCalledAt !== $calledKey) {
                 $this->lastCalledAt = $calledKey;
                 $this->lastCalledQueueId = $currentCall->id;
@@ -46,19 +47,19 @@ class QueueTvDisplay extends Component
             ->get()
             ->map(function ($poli) use ($today) {
                 // Antrean yang sedang dipanggil / dilayani di poli ini
-                $activeQueue = Queue::whereHas('visit', fn ($v) => $v->where('visit_date', $today)->where('polyclinic_id', $poli->id))
+                $activeQueue = Queue::whereHas('visit', fn ($v) => $v->whereDate('visit_date', $today)->where('polyclinic_id', $poli->id))
                     ->whereIn('status', [QueueStatus::Called, QueueStatus::Serving])
                     ->orderByDesc('called_at')
                     ->first();
 
                 // Antrean berikutnya yang berstatus waiting
-                $nextQueue = Queue::whereHas('visit', fn ($v) => $v->where('visit_date', $today)->where('polyclinic_id', $poli->id))
+                $nextQueue = Queue::whereHas('visit', fn ($v) => $v->whereDate('visit_date', $today)->where('polyclinic_id', $poli->id))
                     ->where('status', QueueStatus::Waiting)
                     ->orderBy('queue_number', 'asc')
                     ->first();
 
                 // Jumlah antrean menunggu
-                $waitingCount = Queue::whereHas('visit', fn ($v) => $v->where('visit_date', $today)->where('polyclinic_id', $poli->id))
+                $waitingCount = Queue::whereHas('visit', fn ($v) => $v->whereDate('visit_date', $today)->where('polyclinic_id', $poli->id))
                     ->where('status', QueueStatus::Waiting)
                     ->count();
 

@@ -10,10 +10,13 @@ use Livewire\Component;
 class KioskCheckIn extends Component
 {
     public string $mode = 'code'; // code | nik
+
     public string $inputCode = '';
+
     public string $inputNik = '';
 
     public ?Queue $checkedInQueue = null;
+
     public ?string $errorMessage = null;
 
     public function switchMode(string $mode): void
@@ -42,7 +45,7 @@ class KioskCheckIn extends Component
                     ->orWhere('qr_token', $code)
                     ->orWhereHas('visit', fn ($v) => $v->where('visit_number', $code));
             })
-            ->whereHas('visit', fn ($v) => $v->where('visit_date', $today))
+            ->whereHas('visit', fn ($v) => $v->whereDate('visit_date', $today))
             ->first();
 
         $this->processCheckIn($queue);
@@ -64,7 +67,7 @@ class KioskCheckIn extends Component
 
         $queue = Queue::with(['visit.patient', 'visit.doctor.polyclinic', 'visit.polyclinic', 'doctorSchedule'])
             ->whereHas('visit', function ($v) use ($today, $nik) {
-                $v->where('visit_date', $today)
+                $v->whereDate('visit_date', $today)
                     ->whereHas('patient', fn ($p) => $p->where('nik', $nik));
             })
             ->whereNotIn('status', [QueueStatus::Completed, QueueStatus::Cancelled])

@@ -33,18 +33,28 @@ class LoketPanggilan extends Page
 
     // State Filter & Active Caller
     public ?int $selectedPolyclinicId = null;
+
     public ?int $selectedDoctorId = null;
+
     public ?Queue $activeQueue = null;
 
     // State Walk-In Registration
     public bool $showWalkInModal = false;
+
     public string $walkInName = '';
+
     public string $walkInNik = '';
+
     public string $walkInGender = 'L';
+
     public string $walkInBirthDate = '';
+
     public string $walkInPhone = '';
+
     public string $walkInPaymentType = 'general';
+
     public ?int $walkInPolyclinicId = null;
+
     public ?int $walkInDoctorId = null;
 
     public function mount(): void
@@ -79,7 +89,7 @@ class LoketPanggilan extends Page
 
         $query = Queue::with(['visit.patient', 'visit.doctor.polyclinic', 'visit.polyclinic', 'doctorSchedule'])
             ->whereHas('visit', function ($v) use ($today) {
-                $v->where('visit_date', $today);
+                $v->whereDate('visit_date', $today);
                 if ($this->selectedPolyclinicId) {
                     $v->where('polyclinic_id', $this->selectedPolyclinicId);
                 }
@@ -141,7 +151,7 @@ class LoketPanggilan extends Page
             'served_at' => now(),
         ]);
 
-        $queue->visit?->update(['status' => VisitStatus::InConsultation]);
+        $queue->visit?->update(['status' => VisitStatus::InExamination]);
 
         Notification::make()
             ->info()
@@ -169,7 +179,7 @@ class LoketPanggilan extends Page
 
         Notification::make()
             ->success()
-            ->title("Pelayanan Selesai")
+            ->title('Pelayanan Selesai')
             ->body("Antrean {$queue->queue_code} telah selesai.")
             ->send();
 
@@ -190,7 +200,7 @@ class LoketPanggilan extends Page
 
         Notification::make()
             ->warning()
-            ->title("Antrean Dilewati")
+            ->title('Antrean Dilewati')
             ->body("Nomor {$queue->queue_code} dilewati karena tidak hadir di ruang tunggu.")
             ->send();
 
@@ -262,7 +272,7 @@ class LoketPanggilan extends Page
         ]);
 
         // Hitung nomor antrean berikutnya
-        $bookedCount = Queue::whereHas('visit', fn ($v) => $v->where('visit_date', $today)->where('polyclinic_id', $this->walkInPolyclinicId))->count();
+        $bookedCount = Queue::whereHas('visit', fn ($v) => $v->whereDate('visit_date', $today)->where('polyclinic_id', $this->walkInPolyclinicId))->count();
         $queueNumber = $bookedCount + 1;
         $poli = Polyclinic::find($this->walkInPolyclinicId);
         $queueCode = sprintf('%s-%s-%03d', $poli->code, date('ymd'), $queueNumber);
@@ -296,7 +306,7 @@ class LoketPanggilan extends Page
 
         $waitingQueues = Queue::with(['visit.patient', 'visit.doctor', 'visit.polyclinic'])
             ->whereHas('visit', function ($v) use ($today) {
-                $v->where('visit_date', $today);
+                $v->whereDate('visit_date', $today);
                 if ($this->selectedPolyclinicId) {
                     $v->where('polyclinic_id', $this->selectedPolyclinicId);
                 }
@@ -310,7 +320,7 @@ class LoketPanggilan extends Page
             ->get();
 
         $completedCount = Queue::whereHas('visit', function ($v) use ($today) {
-            $v->where('visit_date', $today);
+            $v->whereDate('visit_date', $today);
             if ($this->selectedPolyclinicId) {
                 $v->where('polyclinic_id', $this->selectedPolyclinicId);
             }

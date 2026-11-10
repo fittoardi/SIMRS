@@ -17,3 +17,4 @@
         <livewire:public.kiosk-check-in />
     </div>
 </x-app-layout>
+
