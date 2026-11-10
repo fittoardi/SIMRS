@@ -368,3 +368,4 @@ class BookingWizard extends Component
         ]);
     }
 }
+

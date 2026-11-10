@@ -77,3 +77,4 @@ class QueueHistory extends Component
         ]);
     }
 }
+

@@ -17,3 +17,4 @@
         <livewire:patient.patient-profile-form />
     </div>
 </x-app-layout>
+

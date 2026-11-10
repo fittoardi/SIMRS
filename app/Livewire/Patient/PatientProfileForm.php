@@ -124,3 +124,4 @@ class PatientProfileForm extends Component
         return view('livewire.patient.patient-profile-form');
     }
 }
+

@@ -93,3 +93,4 @@ class DigitalTicket extends Component
         ]);
     }
 }
+

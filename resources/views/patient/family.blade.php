@@ -17,3 +17,4 @@
         <livewire:patient.family-member-manager />
     </div>
 </x-app-layout>
+

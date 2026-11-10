@@ -17,3 +17,4 @@
         <livewire:patient.booking-wizard />
     </div>
 </x-app-layout>
+

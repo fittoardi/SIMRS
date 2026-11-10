@@ -19,3 +19,4 @@
         <livewire:patient.digital-ticket :visit-id="$visit->id" />
     </div>
 </x-app-layout>
+

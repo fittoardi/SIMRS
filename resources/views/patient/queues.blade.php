@@ -19,3 +19,4 @@
         <livewire:patient.queue-history />
     </div>
 </x-app-layout>
+
