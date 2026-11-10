@@ -11,9 +11,12 @@ Before relying on a package's API, confirm its installed version:
 - PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
 - JS packages: check `package.json` for the installed versions.
 
-## Skills Activation
+## Skills Activation & Pre-Execution Inspection
 
-This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
+- This project has domain-specific skills available in `**/skills/**` (e.g., in `.agents/skills/**`).
+- **MANDATORY: Read Skills Before Execution**: Before executing any task, designing an implementation plan, or writing/modifying code, you MUST inspect and read the relevant `SKILL.md` (and its reference documents) for that domain.
+- Do NOT proceed with assumptions or improvised workflows when an applicable skill exists (e.g., `laravel-best-practices`, `tailwindcss-development`, `testing-best-practices`, `ui-taste`, `agent-browser`, etc.).
+- Always read, activate, and strictly follow the instructions, patterns, and constraints defined within the skill before executing any changes. Do not wait until you are stuck.
 
 ## Conventions
 
