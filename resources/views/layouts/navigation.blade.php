@@ -88,8 +88,24 @@
                                 {{ __('Area Pasien') }}
                             </x-dropdown-link>
 
+                            <x-dropdown-link :href="route('patient.booking')">
+                                {{ __('Booking Antrean') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('patient.queues')">
+                                {{ __('Daftar Antrean Saya') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('patient.family')">
+                                {{ __('Anggota Keluarga') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('patient.profile')">
+                                {{ __('Data Rekam Medis') }}
+                            </x-dropdown-link>
+
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Pengaturan Profil') }}
+                                {{ __('Pengaturan Akun') }}
                             </x-dropdown-link>
 
                             @if(Auth::user()->hasAnyRole(['super_admin', 'doctor', 'nurse', 'admission', 'pharmacist', 'cashier']))

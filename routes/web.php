@@ -44,12 +44,45 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = auth()->user();
         $patient = $user->patient;
 
-        return view('patient.dashboard', compact('user', 'patient'));
+        $patientIds = [];
+        if ($patient) {
+            $patientIds[] = $patient->id;
+        }
+        $familyPatientIds = $user->familyMembers()->pluck('patient_id')->toArray();
+        $allPatientIds = array_unique(array_merge($patientIds, $familyPatientIds));
+
+        $activeQueues = \App\Models\Visit::with(['patient', 'doctor.polyclinic', 'polyclinic', 'queue.doctorSchedule'])
+            ->whereIn('patient_id', $allPatientIds)
+            ->whereHas('queue', function ($q) {
+                $q->whereIn('status', [\App\Enums\QueueStatus::Waiting, \App\Enums\QueueStatus::Called, \App\Enums\QueueStatus::Serving]);
+            })
+            ->orderBy('visit_date', 'asc')
+            ->get();
+
+        $familyCount = $user->familyMembers()->count();
+
+        return view('patient.dashboard', compact('user', 'patient', 'activeQueues', 'familyCount'));
     })->name('patient.dashboard');
 
+    Route::get('/akun/profil', function () {
+        return view('patient.profile');
+    })->name('patient.profile');
+
+    Route::get('/akun/keluarga', function () {
+        return view('patient.family');
+    })->name('patient.family');
+
     Route::get('/akun/booking', function () {
-        return redirect()->route('patient.dashboard');
+        return view('patient.booking');
     })->name('patient.booking');
+
+    Route::get('/akun/tiket/{visit}', function (\App\Models\Visit $visit) {
+        return view('patient.ticket', compact('visit'));
+    })->name('patient.ticket');
+
+    Route::get('/akun/antrean', function () {
+        return view('patient.queues');
+    })->name('patient.queues');
 
     Route::get('/dashboard', function () {
         $user = auth()->user();
