@@ -4,7 +4,6 @@ use App\Enums\QueueStatus;
 use App\Enums\VisitStatus;
 use App\Livewire\Patient\BookingWizard;
 use App\Livewire\Patient\DigitalTicket;
-use App\Livewire\Patient\QueueHistory;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use App\Models\Patient;
@@ -42,7 +41,6 @@ test('patient can complete 5-step booking wizard and receive digital ticket', fu
         'code' => 'POL',
         'name' => 'Poli Penyakit Dalam',
         'is_active' => true,
-        'consultation_duration_minutes' => 15,
     ]);
 
     $doctor = Doctor::factory()->create([
@@ -147,7 +145,7 @@ test('patient can cancel their waiting queue from ticket or history', function (
     Livewire::actingAs($user)
         ->test(DigitalTicket::class, ['visitId' => $visit->id])
         ->call('cancelQueue')
-        ->assertSessionHas('success');
+        ->assertSee('Antrean berhasil dibatalkan');
 
     expect($queue->fresh()->status)->toBe(QueueStatus::Cancelled);
     expect($visit->fresh()->status)->toBe(VisitStatus::Cancelled);

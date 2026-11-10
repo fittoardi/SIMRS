@@ -39,7 +39,7 @@ test('patient can update their profile information and allergies', function () {
         ->set('emergency_contact_relation', 'Istri')
         ->call('save')
         ->assertHasNoErrors()
-        ->assertSessionHas('success');
+        ->assertSee('Profil data rekam medis pasien berhasil disimpan');
 
     $patient = Patient::where('nik', '3171012345678901')->first();
     expect($patient)->not->toBeNull();

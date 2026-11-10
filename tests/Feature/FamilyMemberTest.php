@@ -35,7 +35,7 @@ test('user can add family member and assign new medical record number', function
         ->set('allergies', 'Alergi Susu Sapi')
         ->call('save')
         ->assertHasNoErrors()
-        ->assertSessionHas('success');
+        ->assertSee('Ananda Pratama berhasil didaftarkan');
 
     $patient = Patient::where('nik', '3171098765432109')->first();
     expect($patient)->not->toBeNull();
@@ -62,7 +62,7 @@ test('user can remove a family member link', function () {
     Livewire::actingAs($user)
         ->test(FamilyMemberManager::class)
         ->call('removeMember', $member->id)
-        ->assertSessionHas('success');
+        ->assertSee('telah dihapus dari daftar keluarga Anda');
 
     expect(PatientFamilyMember::find($member->id))->toBeNull();
 });
