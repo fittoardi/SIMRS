@@ -18,12 +18,19 @@ class Queue extends Model
         'doctor_schedule_id',
         'queue_number',
         'queue_code',
+        'qr_token',
+        'estimated_time',
         'status',
         'called_at',
         'served_at',
         'completed_at',
         'expires_at',
     ];
+
+    public static function generateQrToken(): string
+    {
+        return 'TKT-' . strtoupper(bin2hex(random_bytes(12)));
+    }
 
     protected function casts(): array
     {

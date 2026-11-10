@@ -23,9 +23,29 @@ class Visit extends Model
         'visit_date',
         'visit_type',
         'payment_type',
+        'bpjs_card_number',
+        'referral_letter_path',
+        'insurance_name',
+        'insurance_card_number',
         'status',
         'notes',
     ];
+
+    public static function generateVisitNumber(): string
+    {
+        $prefix = 'VIS-' . date('Ymd') . '-';
+        $last = static::where('visit_number', 'like', $prefix . '%')
+            ->orderByDesc('id')
+            ->value('visit_number');
+
+        if ($last && preg_match('/-(\d+)$/', $last, $matches)) {
+            $next = str_pad((int) $matches[1] + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $next = '0001';
+        }
+
+        return $prefix . $next;
+    }
 
     protected function casts(): array
     {

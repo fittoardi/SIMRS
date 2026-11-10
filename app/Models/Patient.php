@@ -22,9 +22,31 @@ class Patient extends Model
         'birth_date',
         'blood_type',
         'allergies',
+        'bpjs_number',
+        'insurance_name',
+        'insurance_number',
         'phone',
         'address',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relation',
     ];
+
+    public static function generateMedicalRecordNumber(): string
+    {
+        $prefix = 'RM-' . date('Ym') . '-';
+        $last = static::where('medical_record_number', 'like', $prefix . '%')
+            ->orderByDesc('id')
+            ->value('medical_record_number');
+
+        if ($last && preg_match('/-(\d+)$/', $last, $matches)) {
+            $nextNumber = str_pad((int) $matches[1] + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        return $prefix . $nextNumber;
+    }
 
     protected function casts(): array
     {
