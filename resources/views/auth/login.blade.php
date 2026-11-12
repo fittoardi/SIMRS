@@ -187,6 +187,10 @@
                     </svg>
                     <span>Daftar Pasien Baru Sekarang</span>
                 </a>
+                <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                    Ingin daftar cepat tanpa akun?
+                    <a href="{{ route('public.booking') }}" class="font-bold text-teal-600 hover:underline">Booking Sebagai Tamu →</a>
+                </p>
             </div>
         </div>
     </div>

@@ -33,6 +33,10 @@
                        class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->is('jadwal-dokter*') ? 'bg-teal-50 text-teal-700 dark:bg-gray-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-gray-700' }}">
                         Jadwal Dokter
                     </a>
+                    <a href="{{ auth()->check() ? url('/akun/booking') : route('public.booking') }}"
+                       class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->is('booking-online*') || request()->is('akun/booking*') ? 'bg-teal-50 text-teal-700 dark:bg-gray-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-gray-700' }}">
+                        Booking Online
+                    </a>
                     <a href="{{ url('/ketersediaan-kamar') }}"
                        class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->is('ketersediaan-kamar*') ? 'bg-teal-50 text-teal-700 dark:bg-gray-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-gray-700' }}">
                         Ketersediaan Bed
@@ -159,6 +163,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/jadwal-dokter')" :active="request()->is('jadwal-dokter*')">
                 {{ __('Jadwal Dokter') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="auth()->check() ? url('/akun/booking') : route('public.booking')" :active="request()->is('booking-online*') || request()->is('akun/booking*')">
+                {{ __('Booking Online') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/ketersediaan-kamar')" :active="request()->is('ketersediaan-kamar*')">
                 {{ __('Ketersediaan Kamar') }}

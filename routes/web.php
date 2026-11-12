@@ -45,6 +45,14 @@ Route::get('/check-in', function () {
     return view('public.check-in');
 })->name('public.check-in');
 
+Route::get('/booking-online', function () {
+    return view('public.guest-booking');
+})->name('public.booking');
+
+Route::get('/tiket-antrean/{token}', function (string $token) {
+    return view('public.ticket', compact('token'));
+})->name('public.ticket');
+
 // Area Pasien Terautentikasi (/akun)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/akun', function () {

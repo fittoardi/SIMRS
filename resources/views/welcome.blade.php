@@ -100,16 +100,20 @@
                                 Booking Antrean Online
                             </a>
                         @else
-                            <a href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base font-semibold text-white bg-teal-600 hover:bg-teal-500 shadow-lg shadow-teal-900/40 transition transform hover:-translate-y-0.5">
+                            <a href="{{ route('public.booking') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base font-semibold text-white bg-teal-600 hover:bg-teal-500 shadow-lg shadow-teal-900/40 transition transform hover:-translate-y-0.5">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Daftar Pasien Baru
+                                Booking Online (Tanpa Akun)
+                            </a>
+
+                            <a href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3.5 rounded-xl text-base font-semibold text-white bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 shadow-lg transition">
+                                Daftar Akun Pasien
                             </a>
                         @endauth
 
-                        <a href="{{ url('/jadwal-dokter') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base font-semibold text-white bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 shadow-lg transition">
-                            Lihat Jadwal Dokter
+                        <a href="{{ url('/jadwal-dokter') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3.5 rounded-xl text-base font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 shadow-lg transition">
+                            Jadwal Dokter
                         </a>
                     </div>
 
@@ -139,7 +143,7 @@
                         </div>
 
                         <!-- Card 1: Booking Antrean -->
-                        <a href="{{ url('/akun/booking') }}" class="block p-3.5 rounded-2xl bg-white/75 dark:bg-slate-800/70 hover:bg-teal-50/90 dark:hover:bg-slate-800 transition border border-slate-200/60 dark:border-slate-700 group shadow-sm">
+                        <a href="{{ auth()->check() ? url('/akun/booking') : route('public.booking') }}" class="block p-3.5 rounded-2xl bg-white/75 dark:bg-slate-800/70 hover:bg-teal-50/90 dark:hover:bg-slate-800 transition border border-slate-200/60 dark:border-slate-700 group shadow-sm">
                             <div class="flex items-center gap-3.5">
                                 <div class="w-11 h-11 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-teal-600/20 group-hover:scale-105 transition">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
