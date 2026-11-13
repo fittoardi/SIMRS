@@ -118,6 +118,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Cetak Etiket Farmasi
     Route::get('/farmasi/etiket/{prescription}', PharmacyEtiketController::class)->name('pharmacy.etiket');
+
+    // Tagihan & Kasir Pasien
+    Route::get('/akun/tagihan', function () {
+        return view('patient.invoices');
+    })->name('patient.invoices');
+
+    Route::get('/akun/tagihan/{invoice}', function (\App\Models\Invoice $invoice) {
+        return view('patient.invoice-detail', compact('invoice'));
+    })->name('patient.invoice-detail');
+
+    Route::get('/kasir/kwitansi/{invoice}', BillingKwitansiController::class)->name('billing.kwitansi');
 });
 
 require __DIR__.'/auth.php';
