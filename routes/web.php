@@ -4,7 +4,9 @@ use App\Enums\QueueStatus;
 use App\Http\Controllers\BillingKwitansiController;
 use App\Http\Controllers\PharmacyEtiketController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicInfoController;
 use App\Models\Doctor;
+use App\Models\Invoice;
 use App\Models\Polyclinic;
 use App\Models\Visit;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +55,25 @@ Route::get('/booking-online', function () {
 Route::get('/tiket-antrean/{token}', function (string $token) {
     return view('public.ticket', compact('token'));
 })->name('public.ticket');
+
+// Halaman Edukasi & Informasi Publik RS
+Route::get('/tentang-kami', [PublicInfoController::class, 'about'])->name('public.about');
+Route::get('/alur-berobat', [PublicInfoController::class, 'patientFlow'])->name('public.patient-flow');
+Route::get('/hak-kewajiban-pasien', [PublicInfoController::class, 'patientRights'])->name('public.patient-rights');
+Route::get('/kebijakan-privasi', [PublicInfoController::class, 'privacyPolicy'])->name('public.privacy-policy');
+Route::get('/faq', [PublicInfoController::class, 'faq'])->name('public.faq');
+Route::get('/kontak', [PublicInfoController::class, 'contact'])->name('public.contact');
+
+// Sitemap XML Otomatis
+Route::get('/sitemap.xml', function () {
+    $doctors = Doctor::where('is_active', true)->get();
+    $polyclinics = Polyclinic::where('is_active', true)->get();
+
+    $content = view('seo.sitemap', compact('doctors', 'polyclinics'))->render();
+
+    return response($content, 200)
+        ->header('Content-Type', 'application/xml');
+})->name('seo.sitemap');
 
 // Area Pasien Terautentikasi (/akun)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -124,7 +145,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('patient.invoices');
     })->name('patient.invoices');
 
-    Route::get('/akun/tagihan/{invoice}', function (\App\Models\Invoice $invoice) {
+    Route::get('/akun/tagihan/{invoice}', function (Invoice $invoice) {
         return view('patient.invoice-detail', compact('invoice'));
     })->name('patient.invoice-detail');
 

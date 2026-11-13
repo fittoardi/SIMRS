@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /akun/
+Disallow: /kasir/
+Disallow: /farmasi/
+Disallow: /profile
+
+Sitemap: /sitemap.xml

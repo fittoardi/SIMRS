@@ -5,7 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'RS Aisyah Medika') }}</title>
+        <title>{{ config('app.name', 'RS Aisyah Medika') }} — Sistem Informasi Rumah Sakit</title>
+        <meta name="description" content="Sistem Informasi Rumah Sakit Terpadu RS Aisyah Medika: Jadwal Dokter, Booking Antrean Online, Rekam Medis, Ketersediaan Kamar, dan Layanan Kasir Terintegrasi.">
+        <meta property="og:title" content="RS Aisyah Medika — Sistem Informasi Rumah Sakit Terpadu">
+        <meta property="og:description" content="Pelayanan kesehatan profesional dan humanis. Booking antrean online, cek dokter spesialis, dan ketersediaan kamar rawat inap real-time.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -32,7 +37,13 @@
             <main>
                 {{ $slot }}
             </main>
+
+            <!-- Footer -->
+            <x-footer />
         </div>
+
+        <!-- Floating Emergency Action Buttons -->
+        <x-floating-emergency />
 
         <!-- Mobile Bottom Navigation (< 768px) -->
         <x-bottom-navigation />

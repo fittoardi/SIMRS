@@ -258,18 +258,10 @@
     </section>
 
     <!-- Footer -->
-    <footer class="mt-auto bg-slate-900/95 backdrop-blur-md text-slate-400 text-xs py-8 border-t border-slate-800 relative z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-                <p class="font-bold text-sm text-white">RS Aisyah Medika</p>
-                <p class="text-slate-500 mt-0.5">Jl. Kesehatan No. 45, Jakarta Selatan • Telp: (021) 8765-4321</p>
-            </div>
-            <div class="text-center sm:text-right text-slate-500">
-                <p>© {{ date('Y') }} RS Aisyah Medika. Seluruh hak cipta dilindungi.</p>
-                <p class="mt-0.5">Sistem Informasi Manajemen Rumah Sakit (SIMRS) Responsif</p>
-            </div>
-        </div>
-    </footer>
+    <x-footer />
+
+    <!-- Floating Emergency & WhatsApp Button -->
+    <x-floating-emergency />
 
     <!-- Mobile Bottom Navigation (< 768px) -->
     <x-bottom-navigation />
