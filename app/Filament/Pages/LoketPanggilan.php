@@ -31,6 +31,11 @@ class LoketPanggilan extends Page
 
     protected string $view = 'filament.pages.loket-panggilan';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasAnyRole(['super_admin', 'admission', 'nurse', 'doctor']) ?? false;
+    }
+
     // State Filter & Active Caller
     public ?int $selectedPolyclinicId = null;
 

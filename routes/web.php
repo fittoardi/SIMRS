@@ -46,11 +46,11 @@ Route::get('/layar-antrean', function () {
 
 Route::get('/check-in', function () {
     return view('public.check-in');
-})->name('public.check-in');
+})->name('public.check-in')->middleware('throttle:checkin');
 
 Route::get('/booking-online', function () {
     return view('public.guest-booking');
-})->name('public.booking');
+})->name('public.booking')->middleware('throttle:booking');
 
 Route::get('/tiket-antrean/{token}', function (string $token) {
     return view('public.ticket', compact('token'));
@@ -111,9 +111,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/akun/booking', function () {
         return view('patient.booking');
-    })->name('patient.booking');
+    })->name('patient.booking')->middleware('throttle:booking');
 
     Route::get('/akun/tiket/{visit}', function (Visit $visit) {
+        $user = auth()->user();
+        $isOwner = ($user->patient && $user->patient->id === $visit->patient_id)
+            || $user->familyMembers()->where('patient_id', $visit->patient_id)->exists();
+        $isStaff = $user->hasAnyRole(['super_admin', 'doctor', 'nurse', 'admission', 'pharmacist', 'cashier']);
+
+        if (! $isOwner && ! $isStaff) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat tiket antrean ini.');
+        }
+
         return view('patient.ticket', compact('visit'));
     })->name('patient.ticket');
 
@@ -146,6 +155,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('patient.invoices');
 
     Route::get('/akun/tagihan/{invoice}', function (Invoice $invoice) {
+        $user = auth()->user();
+        $isOwner = ($user->patient && $user->patient->id === $invoice->patient_id)
+            || $user->familyMembers()->where('patient_id', $invoice->patient_id)->exists();
+        $isStaff = $user->hasAnyRole(['super_admin', 'cashier', 'doctor', 'nurse', 'admission', 'pharmacist']);
+
+        if (! $isOwner && ! $isStaff) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat rincian tagihan ini.');
+        }
+
         return view('patient.invoice-detail', compact('invoice'));
     })->name('patient.invoice-detail');
 

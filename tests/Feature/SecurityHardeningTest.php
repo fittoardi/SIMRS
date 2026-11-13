@@ -1,8 +1,16 @@
 <?php
 
+use App\Enums\PaymentStatus;
+use App\Filament\Resources\MedicalRecordAccessLogs\MedicalRecordAccessLogResource;
+use App\Filament\Resources\MedicalRecords\MedicalRecordResource;
+use App\Models\Doctor;
+use App\Models\Invoice;
 use App\Models\MedicalRecord;
 use App\Models\MedicalRecordAccessLog;
 use App\Models\Patient;
+use App\Models\PatientFamilyMember;
+use App\Models\Prescription;
+use App\Models\Queue;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\MedicalAuditLogger;
@@ -11,6 +19,10 @@ use Spatie\Permission\Models\Role;
 beforeEach(function () {
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'nurse', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'cashier', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'pharmacist', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'admission', 'guard_name' => 'web']);
     Role::firstOrCreate(['name' => 'patient', 'guard_name' => 'web']);
 });
 
@@ -80,3 +92,107 @@ test('custom 404 page is displayed when navigating to invalid route', function (
     $response->assertSee('Ke Beranda Utama');
 });
 
+test('idor protection: patient A cannot view ticket of patient B', function () {
+    $userA = User::factory()->create();
+    $userA->assignRole('patient');
+    $patientA = Patient::factory()->create(['user_id' => $userA->id]);
+
+    $userB = User::factory()->create();
+    $userB->assignRole('patient');
+    $patientB = Patient::factory()->create(['user_id' => $userB->id]);
+
+    $visitB = Visit::factory()->create(['patient_id' => $patientB->id]);
+    Queue::factory()->create(['visit_id' => $visitB->id]);
+
+    // Pasien A mencoba mengakses tiket Pasien B
+    $response = $this->actingAs($userA)->get("/akun/tiket/{$visitB->id}");
+
+    $response->assertForbidden();
+});
+
+test('patient can view their own ticket and family member ticket', function () {
+    $user = User::factory()->create();
+    $user->assignRole('patient');
+    $patient = Patient::factory()->create(['user_id' => $user->id]);
+
+    $familyPatient = Patient::factory()->create(['user_id' => null]);
+    PatientFamilyMember::create([
+        'user_id' => $user->id,
+        'patient_id' => $familyPatient->id,
+        'relationship' => 'anak',
+    ]);
+
+    $ownVisit = Visit::factory()->create(['patient_id' => $patient->id]);
+    Queue::factory()->create(['visit_id' => $ownVisit->id]);
+
+    $familyVisit = Visit::factory()->create(['patient_id' => $familyPatient->id]);
+    Queue::factory()->create(['visit_id' => $familyVisit->id]);
+
+    // Tiket sendiri harus OK
+    $this->actingAs($user)->get("/akun/tiket/{$ownVisit->id}")->assertOk();
+
+    // Tiket keluarga harus OK
+    $this->actingAs($user)->get("/akun/tiket/{$familyVisit->id}")->assertOk();
+});
+
+test('idor protection: patient A cannot view invoice of patient B', function () {
+    $userA = User::factory()->create();
+    $userA->assignRole('patient');
+    $patientA = Patient::factory()->create(['user_id' => $userA->id]);
+
+    $userB = User::factory()->create();
+    $userB->assignRole('patient');
+    $patientB = Patient::factory()->create(['user_id' => $userB->id]);
+
+    $visitB = Visit::factory()->create(['patient_id' => $patientB->id]);
+    $invoiceB = Invoice::create([
+        'number' => 'INV-202611-TEST',
+        'visit_id' => $visitB->id,
+        'patient_id' => $patientB->id,
+        'total' => 250000,
+        'status' => PaymentStatus::Unpaid,
+    ]);
+
+    $response = $this->actingAs($userA)->get("/akun/tagihan/{$invoiceB->id}");
+
+    $response->assertForbidden();
+});
+
+test('patient cannot access pharmacy etiket endpoint', function () {
+    $patientUser = User::factory()->create();
+    $patientUser->assignRole('patient');
+
+    $patient = Patient::factory()->create(['user_id' => $patientUser->id]);
+    $visit = Visit::factory()->create(['patient_id' => $patient->id]);
+    $doctor = Doctor::factory()->create();
+
+    $prescription = Prescription::create([
+        'visit_id' => $visit->id,
+        'doctor_id' => $doctor->id,
+        'prescription_number' => 'RX-202611-TEST',
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($patientUser)->get("/farmasi/etiket/{$prescription->id}");
+
+    $response->assertForbidden();
+});
+
+test('cashier cannot view medical records and audit log is immutable', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('cashier');
+
+    $doctor = User::factory()->create();
+    $doctor->assignRole('doctor');
+
+    $this->actingAs($cashier);
+    expect(MedicalRecordResource::canViewAny())->toBeFalse();
+
+    $this->actingAs($doctor);
+    expect(MedicalRecordResource::canViewAny())->toBeTrue();
+
+    // Audit logs immutability check
+    expect(MedicalRecordAccessLogResource::canCreate())->toBeFalse()
+        ->and(MedicalRecordAccessLogResource::canEdit(new MedicalRecordAccessLog))->toBeFalse()
+        ->and(MedicalRecordAccessLogResource::canDelete(new MedicalRecordAccessLog))->toBeFalse();
+});

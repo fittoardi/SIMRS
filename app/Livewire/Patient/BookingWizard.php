@@ -14,6 +14,7 @@ use App\Models\Visit;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -28,18 +29,25 @@ class BookingWizard extends Component
 
     // Step 2: Poli & Dokter
     public ?int $selectedPolyclinicId = null;
+
     public ?int $selectedDoctorId = null;
 
     // Step 3: Tanggal & Sesi Jadwal
     public string $selectedDate = '';
+
     public ?int $selectedScheduleId = null;
 
     // Step 4: Cara Pembayaran & Dokumen
     public string $paymentType = 'general'; // general, bpjs, insurance
+
     public string $bpjsCardNumber = '';
+
     public $referralLetter = null; // file
+
     public string $insuranceName = '';
+
     public string $insuranceCardNumber = '';
+
     public string $complaint = '';
 
     public function mount(): void
@@ -187,17 +195,9 @@ class BookingWizard extends Component
 
     public function confirmBooking(): void
     {
-        // Re-verifikasi kuota terakhir kali sebelum simpan
-        $schedule = DoctorSchedule::with('doctor.polyclinic')->findOrFail($this->selectedScheduleId);
-        $bookedCount = Queue::where('doctor_schedule_id', $schedule->id)
-            ->whereHas('visit', fn ($q) => $q->where('visit_date', $this->selectedDate)->where('status', '!=', VisitStatus::Cancelled))
-            ->count();
-
-        if ($bookedCount >= $schedule->max_quota) {
-            session()->flash('error', 'Mohon maaf, kuota sesi dokter ini telah habis terisi. Silakan pilih jadwal sesi lainnya.');
-            $this->currentStep = 3;
-
-            return;
+        // Validasi hak akses pasien terpilih (anti-IDOR & anti-tampering)
+        if (! $this->selectedPatientId || ! $this->validatePatientAccess((int) $this->selectedPatientId)) {
+            abort(403, 'Akses ke data pasien ini tidak diizinkan.');
         }
 
         // Upload surat rujukan jika ada
@@ -206,47 +206,65 @@ class BookingWizard extends Component
             $referralPath = $this->referralLetter->store('referrals', 'public');
         }
 
-        // 1. Buat data Visit
-        $visit = Visit::create([
-            'visit_number' => Visit::generateVisitNumber(),
-            'patient_id' => $this->selectedPatientId,
-            'doctor_id' => $this->selectedDoctorId,
-            'polyclinic_id' => $this->selectedPolyclinicId,
-            'visit_date' => $this->selectedDate,
-            'visit_type' => 'outpatient',
-            'payment_type' => $this->paymentType,
-            'bpjs_card_number' => $this->paymentType === 'bpjs' ? $this->bpjsCardNumber : null,
-            'referral_letter_path' => $referralPath,
-            'insurance_name' => $this->paymentType === 'insurance' ? $this->insuranceName : null,
-            'insurance_card_number' => $this->paymentType === 'insurance' ? $this->insuranceCardNumber : null,
-            'status' => VisitStatus::Registered,
-            'notes' => $this->complaint ?: null,
-        ]);
+        try {
+            $visit = DB::transaction(function () use ($referralPath) {
+                // Re-verifikasi kuota terakhir kali dengan lock
+                $schedule = DoctorSchedule::with('doctor.polyclinic')->lockForUpdate()->findOrFail($this->selectedScheduleId);
+                $bookedCount = Queue::where('doctor_schedule_id', $schedule->id)
+                    ->whereHas('visit', fn ($q) => $q->where('visit_date', $this->selectedDate)->where('status', '!=', VisitStatus::Cancelled))
+                    ->count();
 
-        // 2. Hitung nomor antrean berikutnya pada jadwal & tanggal ini
-        $queueNumber = $bookedCount + 1;
-        $poliCode = $schedule->doctor?->polyclinic?->code ?? 'POL';
-        $queueCode = sprintf('%s-%s-%03d', $poliCode, date('ymd', strtotime($this->selectedDate)), $queueNumber);
+                if ($bookedCount >= $schedule->max_quota) {
+                    throw new \RuntimeException('Mohon maaf, kuota sesi dokter ini telah habis terisi. Silakan pilih jadwal sesi lainnya.');
+                }
 
-        // 3. Estimasi jam pelayanan: jam mulai + ((nomor urut - 1) * estimasi menit poli)
-        $duration = $schedule->doctor?->polyclinic?->consultation_duration_minutes ?? 15;
-        $startTime = Carbon::createFromFormat('H:i:s', $schedule->start_time);
-        $estimatedTime = $startTime->copy()->addMinutes(($queueNumber - 1) * $duration)->format('H:i');
+                // 1. Buat data Visit
+                $newVisit = Visit::create([
+                    'visit_number' => Visit::generateVisitNumber(),
+                    'patient_id' => $this->selectedPatientId,
+                    'doctor_id' => $this->selectedDoctorId,
+                    'polyclinic_id' => $this->selectedPolyclinicId,
+                    'visit_date' => $this->selectedDate,
+                    'visit_type' => 'outpatient',
+                    'payment_type' => $this->paymentType,
+                    'bpjs_card_number' => $this->paymentType === 'bpjs' ? $this->bpjsCardNumber : null,
+                    'referral_letter_path' => $referralPath,
+                    'insurance_name' => $this->paymentType === 'insurance' ? $this->insuranceName : null,
+                    'insurance_card_number' => $this->paymentType === 'insurance' ? $this->insuranceCardNumber : null,
+                    'status' => VisitStatus::Registered,
+                    'notes' => $this->complaint ?: null,
+                ]);
 
-        // 4. Buat data Queue
-        $queue = Queue::create([
-            'visit_id' => $visit->id,
-            'doctor_schedule_id' => $schedule->id,
-            'queue_number' => $queueNumber,
-            'queue_code' => $queueCode,
-            'qr_token' => Queue::generateQrToken(),
-            'estimated_time' => $estimatedTime,
-            'status' => QueueStatus::Waiting,
-        ]);
+                // 2. Hitung nomor antrean berikutnya pada jadwal & tanggal ini
+                $queueNumber = $bookedCount + 1;
+                $poliCode = $schedule->doctor?->polyclinic?->code ?? 'POL';
+                $queueCode = sprintf('%s-%s-%03d', $poliCode, date('ymd', strtotime($this->selectedDate)), $queueNumber);
 
-        session()->flash('success', "Pendaftaran antrean berhasil! Nomor Antrean Anda: {$queueCode}");
+                // 3. Estimasi jam pelayanan
+                $duration = $schedule->doctor?->polyclinic?->consultation_duration_minutes ?? 15;
+                $startTime = Carbon::createFromFormat('H:i:s', $schedule->start_time);
+                $estimatedTime = $startTime->copy()->addMinutes(($queueNumber - 1) * $duration)->format('H:i');
 
-        $this->redirect(route('patient.ticket', $visit->id), navigate: true);
+                // 4. Buat data Queue
+                Queue::create([
+                    'visit_id' => $newVisit->id,
+                    'doctor_schedule_id' => $schedule->id,
+                    'queue_number' => $queueNumber,
+                    'queue_code' => $queueCode,
+                    'qr_token' => Queue::generateQrToken(),
+                    'estimated_time' => $estimatedTime,
+                    'status' => QueueStatus::Waiting,
+                ]);
+
+                return $newVisit;
+            });
+
+            session()->flash('success', 'Pendaftaran antrean berhasil!');
+            $this->redirect(route('patient.ticket', $visit->id), navigate: true);
+        } catch (\RuntimeException $e) {
+            session()->flash('error', $e->getMessage());
+            $this->currentStep = 3;
+        }
     }
 
     protected function validatePatientAccess(int $patientId): bool
@@ -368,4 +386,3 @@ class BookingWizard extends Component
         ]);
     }
 }
-

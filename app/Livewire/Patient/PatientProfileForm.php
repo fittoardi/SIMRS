@@ -10,22 +10,37 @@ use Livewire\Component;
 class PatientProfileForm extends Component
 {
     public ?int $patientId = null;
+
     public string $name = '';
+
     public string $nik = '';
+
     public string $gender = 'L';
+
     public string $birth_date = '';
+
     public string $blood_type = '';
+
     public string $allergies = '';
+
     public string $bpjs_number = '';
+
     public string $insurance_name = '';
+
     public string $insurance_number = '';
+
     public string $phone = '';
+
     public string $address = '';
+
     public string $emergency_contact_name = '';
+
     public string $emergency_contact_phone = '';
+
     public string $emergency_contact_relation = '';
 
     public ?string $medical_record_number = null;
+
     public bool $isSaved = false;
 
     public function mount(): void
@@ -98,10 +113,12 @@ class PatientProfileForm extends Component
         $validated = $this->validate();
 
         $user = Auth::user();
+        $patient = $user->patient;
 
-        if ($this->patientId) {
-            $patient = Patient::findOrFail($this->patientId);
+        if ($patient) {
             $patient->update($validated);
+            $this->patientId = $patient->id;
+            $this->medical_record_number = $patient->medical_record_number;
         } else {
             $validated['user_id'] = $user->id;
             $validated['medical_record_number'] = Patient::generateMedicalRecordNumber();
@@ -124,4 +141,3 @@ class PatientProfileForm extends Component
         return view('livewire.patient.patient-profile-form');
     }
 }
-
