@@ -1,32 +1,33 @@
-<!DOCTYPE html>
-<html lang="id" class="h-full">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>403 — Akses Ditolak | RS Aisyah Medika</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 p-8 rounded-3xl text-center shadow-2xl space-y-6">
-        <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center font-black text-2xl mx-auto shadow-inner">
-            🛡️
-        </div>
-        <div>
-            <span class="text-xs uppercase font-extrabold tracking-wider text-rose-400">Status 403 • Akses Terbatas</span>
-            <h1 class="text-2xl font-black text-white mt-1">Akses Ditolak (Privasi Medis)</h1>
-            <p class="text-xs text-slate-400 mt-3 leading-relaxed">
-                {{ $exception->getMessage() ?: 'Anda tidak memiliki hak otorisasi untuk mengakses data rekam medis atau dokumen ini. Hal ini dilindungi oleh Kebijakan Privasi Rumah Sakit dan UU Perlindungan Data Pribadi (UU PDP No. 27 Tahun 2022).' }}
-            </p>
-        </div>
-        <div class="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center text-xs">
-            <a href="{{ url('/') }}" class="px-5 py-2.5 rounded-xl font-semibold bg-teal-600 text-white hover:bg-teal-500 transition shadow-sm">
-                Kembali ke Beranda
-            </a>
-            <a href="tel:02187654321" class="px-5 py-2.5 rounded-xl font-semibold bg-slate-700 text-slate-200 hover:bg-slate-600 transition">
-                Hubungi Call Center
-            </a>
-        </div>
-    </div>
-</body>
-</html>
+@extends('errors.layout')
 
+@section('title', '403 — Akses Ditolak')
+@section('code', '403')
+@section('badge', 'Status 403 • Akses Terbatas')
+@section('badge_classes', 'bg-rose-500/10 text-rose-300 border border-rose-500/30')
+@section('icon_wrapper_classes', 'bg-rose-500/10 border-rose-500/20 text-rose-400')
+
+@section('icon')
+    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    </svg>
+@endsection
+
+@section('heading', 'Akses Ditolak (Privasi Medis)')
+
+@section('message')
+    <p>
+        {{ !empty($exception?->getMessage()) ? $exception->getMessage() : 'Anda tidak memiliki hak otorisasi untuk mengakses berkas rekam medis, billing, atau dokumen ini. Seluruh berkas pasien dilindungi oleh Kebijakan Privasi Rumah Sakit dan UU Perlindungan Data Pribadi (UU PDP No. 27 Tahun 2022).' }}
+    </p>
+    <p class="mt-2 text-[11px] text-slate-400">
+        Jika Anda adalah pasien terdaftar atau penanggung jawab keluarga yang sah, pastikan Anda telah masuk dengan akun yang sesuai.
+    </p>
+@endsection
+
+@section('actions')
+    <a href="{{ url('/') }}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold bg-teal-600 text-white hover:bg-teal-500 transition shadow-lg shadow-teal-600/20">
+        Kembali ke Beranda
+    </a>
+    <a href="tel:02187654321" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white transition border border-slate-700">
+        Hubungi Call Center RS
+    </a>
+@endsection
