@@ -73,3 +73,4 @@ test('error 503 view renders correctly', function () {
     $view->assertSee('Periksa Kembali (Refresh)');
     $view->assertSee('IGD 24 Jam: (021) 8765-4322');
 });
+
