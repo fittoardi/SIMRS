@@ -180,3 +180,4 @@ class InvoicesTable
             ->defaultSort('created_at', 'desc');
     }
 }
+

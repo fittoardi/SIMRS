@@ -17,3 +17,4 @@
         <livewire:patient.patient-invoice-list />
     </div>
 </x-app-layout>
+

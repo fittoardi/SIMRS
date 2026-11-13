@@ -42,3 +42,4 @@ test('guest is redirected to filament login when accessing invoices', function (
 
     $response->assertRedirect('/admin/login');
 });
+

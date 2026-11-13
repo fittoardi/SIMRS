@@ -50,3 +50,4 @@ class PatientInvoiceList extends Component
         ]);
     }
 }
+

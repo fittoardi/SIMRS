@@ -29,3 +29,4 @@ class CreateInvoice extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 }
+

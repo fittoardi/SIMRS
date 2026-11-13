@@ -86,3 +86,4 @@ class PatientInvoiceDetail extends Component
         ]);
     }
 }
+

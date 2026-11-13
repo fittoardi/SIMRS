@@ -17,3 +17,4 @@
         <livewire:patient.patient-invoice-detail :invoice-id="$invoice->id" />
     </div>
 </x-app-layout>
+
