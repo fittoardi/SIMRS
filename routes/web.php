@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\QueueStatus;
+use App\Http\Controllers\BillingKwitansiController;
 use App\Http\Controllers\PharmacyEtiketController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Doctor;
