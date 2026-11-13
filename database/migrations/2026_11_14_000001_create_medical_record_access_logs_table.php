@@ -40,3 +40,4 @@ return new class extends Migration
         Schema::dropIfExists('medical_record_access_logs');
     }
 };
+

@@ -14,3 +14,4 @@ class ListMedicalRecordAccessLogs extends ListRecords
         return [];
     }
 }
+

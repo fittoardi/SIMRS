@@ -36,3 +36,4 @@ class MedicalRecordAccessLog extends Model
         return $this->belongsTo(MedicalRecord::class);
     }
 }
+

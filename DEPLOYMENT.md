@@ -208,3 +208,4 @@ Jalankan `crontab -e -u www-data` dan tambahkan:
 - [x] Jalankan backup database terjadwal ke penyimpanan cloud terpisah.
 - [x] Lakukan uji coba pencetakan fisik ke printer thermal POS di loket admisi, kasir, dan farmasi.
 - [x] Lakukan orientasi singkat aplikasi kepada perwakilan staf tiap unit kerja.
+

@@ -79,3 +79,4 @@ test('custom 404 page is displayed when navigating to invalid route', function (
     $response->assertSee('Halaman Tidak Ditemukan');
     $response->assertSee('Ke Beranda Utama');
 });
+

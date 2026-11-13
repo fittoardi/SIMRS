@@ -105,3 +105,4 @@ Panduan praktis operasional harian Sistem Informasi Manajemen Rumah Sakit (SIMRS
 - **Kerahasiaan Diagnostik**: Staf kasir dan admisi secara sistematis **dilarang dan diblokir** dari membaca catatan klinis SOAP dokter.
 - **Pencegahan Akses Ilegal (Anti-IDOR)**: Pasien hanya dapat mengakses data keluarga dan tagihan miliknya sendiri. Upaya membuka data pasien lain akan diblokir dengan pesan error 403 Forbidden.
 - **Audit Logging**: Seluruh riwayat staf yang membuka atau mencetak berkas medis pasien dicatat secara permanen di menu **Audit Log Rekam Medis** (`/admin/medical-record-access-logs`) untuk kepentingan akuntabilitas hukum rumah sakit.
+
