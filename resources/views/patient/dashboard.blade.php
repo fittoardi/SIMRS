@@ -167,6 +167,18 @@
                             </div>
                         </a>
 
+                        <a href="{{ route('patient.invoices') }}" class="flex items-center p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-gray-700/60 transition group border border-slate-100 dark:border-gray-700">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center mr-3 group-hover:scale-105 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-teal-700">Tagihan & Pembayaran</p>
+                                <p class="text-[11px] text-slate-500">Rincian invoice & bayar online</p>
+                            </div>
+                        </a>
+
                         <a href="{{ route('patient.family') }}" class="flex items-center p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-gray-700/60 transition group border border-slate-100 dark:border-gray-700">
                             <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center mr-3 group-hover:scale-105 transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

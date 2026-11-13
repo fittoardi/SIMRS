@@ -104,6 +104,10 @@
                                 {{ __('Daftar Antrean Saya') }}
                             </x-dropdown-link>
 
+                            <x-dropdown-link :href="route('patient.invoices')">
+                                {{ __('Tagihan & Pembayaran') }}
+                            </x-dropdown-link>
+
                             <x-dropdown-link :href="route('patient.family')">
                                 {{ __('Anggota Keluarga') }}
                             </x-dropdown-link>
@@ -177,8 +181,11 @@
                 {{ __('Kiosk Check-In Mandiri') }}
             </x-responsive-nav-link>
             @auth
-                <x-responsive-nav-link :href="route('patient.dashboard')" :active="request()->is('akun*')">
+                <x-responsive-nav-link :href="route('patient.dashboard')" :active="request()->is('akun')">
                     {{ __('Area Pasien (/akun)') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('patient.invoices')" :active="request()->is('akun/tagihan*')">
+                    {{ __('Tagihan & Pembayaran') }}
                 </x-responsive-nav-link>
                 @if(Auth::user()->hasAnyRole(['super_admin', 'doctor', 'nurse', 'admission', 'pharmacist', 'cashier']))
                     <x-responsive-nav-link :href="url('/admin')" class="text-teal-600 font-semibold">
