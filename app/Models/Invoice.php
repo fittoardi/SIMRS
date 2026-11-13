@@ -26,6 +26,22 @@ class Invoice extends Model
         'notes',
     ];
 
+    public static function generateInvoiceNumber(): string
+    {
+        $prefix = 'INV-' . date('Ym') . '-';
+        $last = static::where('number', 'like', $prefix . '%')
+            ->orderByDesc('id')
+            ->value('number');
+
+        if ($last && preg_match('/-(\d+)$/', $last, $matches)) {
+            $next = str_pad((int) $matches[1] + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $next = '0001';
+        }
+
+        return $prefix . $next;
+    }
+
     protected function casts(): array
     {
         return [

@@ -90,6 +90,11 @@ class Visit extends Model
         return $this->hasMany(Prescription::class);
     }
 
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class)->latestOfMany();
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
