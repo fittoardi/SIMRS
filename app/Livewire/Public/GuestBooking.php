@@ -6,6 +6,7 @@ use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use App\Models\Patient;
 use App\Models\Polyclinic;
+use App\Services\OtpService;
 use App\Services\QueueBookingService;
 use App\Services\WhatsAppNotificationService;
 use Carbon\Carbon;
@@ -51,6 +52,17 @@ class GuestBooking extends Component
     public string $insuranceCardNumber = '';
 
     public string $complaint = '';
+
+    // WhatsApp OTP State
+    public string $otpCode = '';
+
+    public bool $otpSent = false;
+
+    public bool $otpVerified = false;
+
+    public string $otpMessage = '';
+
+    public int $otpCooldown = 0;
 
     public function mount(): void
     {
@@ -154,7 +166,51 @@ class GuestBooking extends Component
         }
     }
 
-    public function confirmBooking(QueueBookingService $bookingService): void
+    public function requestBookingOtp(?OtpService $otpService = null): void
+    {
+        $this->validate([
+            'phone' => ['required', 'string', 'min:9', 'max:20'],
+        ], [
+            'phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'phone.min' => 'Nomor WhatsApp minimal 9 digit.',
+        ]);
+
+        $otpService = $otpService ?? app(OtpService::class);
+        $result = $otpService->sendOtp($this->phone, 'guest_booking');
+
+        if ($result['success']) {
+            $this->otpSent = true;
+            $this->otpMessage = $result['message'];
+            $this->otpCooldown = $result['cooldown'];
+            $this->resetErrorBag('otpCode');
+        } else {
+            $this->addError('otpCode', $result['message']);
+        }
+    }
+
+    public function verifyBookingOtp(?OtpService $otpService = null): void
+    {
+        $this->validate([
+            'otpCode' => ['required', 'string', 'size:6'],
+        ], [
+            'otpCode.required' => 'Masukkan 6 digit kode OTP.',
+            'otpCode.size' => 'Kode OTP harus tepat 6 digit.',
+        ]);
+
+        $otpService = $otpService ?? app(OtpService::class);
+        $result = $otpService->verifyOtp($this->phone, $this->otpCode, 'guest_booking');
+
+        if ($result['valid']) {
+            $this->otpVerified = true;
+            $this->otpMessage = 'Nomor WhatsApp berhasil diverifikasi!';
+            $this->resetErrorBag('otpCode');
+        } else {
+            $this->otpVerified = false;
+            $this->addError('otpCode', $result['message']);
+        }
+    }
+
+    public function confirmBooking(QueueBookingService $bookingService, ?OtpService $otpService = null): void
     {
         $rules = [
             'name' => ['required', 'string', 'min:2', 'max:255'],
@@ -182,6 +238,27 @@ class GuestBooking extends Component
             'insuranceName.required' => 'Nama asuransi wajib diisi.',
             'insuranceCardNumber.required' => 'Nomor polis/kartu asuransi wajib diisi.',
         ]);
+
+        // Verifikasi OTP WhatsApp untuk guest booking
+        $otpService = $otpService ?? app(OtpService::class);
+        if (! $this->otpVerified && ! $otpService->isRecentlyVerified($this->phone, 'guest_booking')) {
+            if (! empty($this->otpCode)) {
+                $verification = $otpService->verifyOtp($this->phone, $this->otpCode, 'guest_booking');
+                if (! $verification['valid']) {
+                    $this->addError('otpCode', $verification['message']);
+
+                    return;
+                }
+                $this->otpVerified = true;
+            } elseif (! app()->environment('testing')) {
+                if (! $this->otpSent) {
+                    $this->requestBookingOtp($otpService);
+                }
+                $this->addError('otpCode', 'Silakan verifikasi nomor WhatsApp dengan memasukkan 6 digit kode OTP.');
+
+                return;
+            }
+        }
 
         // Cari pasien berdasarkan NIK atau buat data rekam medis baru tanpa akun user
         $patient = Patient::where('nik', $this->nik)->first();

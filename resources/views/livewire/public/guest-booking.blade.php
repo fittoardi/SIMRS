@@ -345,6 +345,71 @@
                         </span>
                     </div>
                 </div>
+
+                <!-- Section Verifikasi OTP WhatsApp -->
+                <div class="rounded-2xl p-5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">🔐</span>
+                            <div>
+                                <p class="font-bold text-sm text-slate-900 dark:text-white">Verifikasi Nomor WhatsApp Pasien</p>
+                                <p class="text-[11px] text-slate-500">Kirim kode OTP ke nomor: <span class="font-mono font-bold text-teal-700 dark:text-teal-300">{{ $phone }}</span></p>
+                            </div>
+                        </div>
+
+                        @if($otpVerified)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold text-xs shrink-0 self-start sm:self-auto">
+                                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                WhatsApp Terverifikasi
+                            </span>
+                        @else
+                            <button
+                                type="button"
+                                wire:click="requestBookingOtp"
+                                wire:loading.attr="disabled"
+                                class="px-4 py-2 rounded-xl font-bold text-xs bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition shrink-0 self-start sm:self-auto"
+                            >
+                                <span wire:loading.remove wire:target="requestBookingOtp">
+                                    {{ $otpSent ? 'Kirim Ulang OTP' : 'Kirim Kode OTP WA' }}
+                                </span>
+                                <span wire:loading wire:target="requestBookingOtp">Mengirim...</span>
+                            </button>
+                        @endif
+                    </div>
+
+                    @if($otpMessage)
+                        <p class="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                            {{ $otpMessage }}
+                        </p>
+                    @endif
+
+                    @if(!$otpVerified && $otpSent)
+                        <div class="pt-2 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <div class="w-full sm:w-48">
+                                <input
+                                    type="text"
+                                    wire:model.live="otpCode"
+                                    maxlength="6"
+                                    placeholder="6 Digit OTP"
+                                    class="w-full text-center text-lg font-mono font-extrabold tracking-widest rounded-xl border-slate-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-teal-500 focus:border-teal-500"
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="verifyBookingOtp"
+                                class="px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition"
+                            >
+                                Verifikasi OTP ✓
+                            </button>
+                        </div>
+                    @endif
+
+                    @error('otpCode')
+                        <p class="text-xs text-rose-600 dark:text-rose-400 font-semibold mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
         @endif
 
