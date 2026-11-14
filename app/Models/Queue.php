@@ -45,6 +45,7 @@ class Queue extends Model
             'called_at' => 'datetime',
             'served_at' => 'datetime',
             'completed_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
     }

@@ -56,7 +56,7 @@ class QueueHistory extends Component
         $familyPatientIds = $user->familyMembers()->pluck('patient_id')->toArray();
         $allPatientIds = array_unique(array_merge($patientIds, $familyPatientIds));
 
-        $query = Visit::with(['patient', 'doctor.polyclinic', 'polyclinic', 'queue.doctorSchedule'])
+        $query = Visit::with(['patient', 'doctor.polyclinic', 'polyclinic', 'queue.doctorSchedule', 'sickLeaveCertificate'])
             ->whereIn('patient_id', $allPatientIds)
             ->whereHas('queue');
 

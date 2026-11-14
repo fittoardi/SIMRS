@@ -181,4 +181,56 @@ class WhatsAppNotificationService
             return false;
         }
     }
+
+    /**
+     * Kirim pesan pengingat jadwal kunjungan H-1 via WhatsApp.
+     */
+    public function sendVisitReminder(Queue $queue): bool
+    {
+        $queue->loadMissing(['visit.patient.user', 'visit.doctor.polyclinic', 'visit.polyclinic', 'doctorSchedule']);
+
+        $visit = $queue->visit;
+        $patient = $visit?->patient;
+        $targetPhone = $patient?->phone ?: $patient?->user?->phone;
+
+        if (empty($targetPhone)) {
+            Log::info("WA Reminder skipped: No phone number for queue #{$queue->id}");
+
+            return false;
+        }
+
+        $dateFormatted = $visit->visit_date
+            ? Carbon::parse($visit->visit_date)->translatedFormat('l, d F Y')
+            : Carbon::tomorrow()->translatedFormat('l, d F Y');
+
+        $estTime = $queue->estimated_time ?? substr($queue->doctorSchedule?->start_time ?? '', 0, 5).' WIB';
+        $roomName = $queue->doctorSchedule?->room_name ?? 'Ruang Poliklinik';
+        $ticketUrl = route('public.ticket', ['token' => $queue->qr_token]);
+
+        $message = "🏥 *PENGINGAT JADWAL KUNJUNGAN (H-1) — RS AISYAH MEDIKA*\n\n"
+            ."Halo Bapak/Ibu *{$patient?->name}*,\n"
+            ."Kami mengingatkan kembali bahwa Anda memiliki jadwal pemeriksaan rawat jalan *BESOK* di RS Aisyah Medika:\n\n"
+            ."🗓️ *Hari/Tanggal:* {$dateFormatted}\n"
+            ."⏰ *Estimasi Waktu:* {$estTime}\n"
+            ."🩺 *Poliklinik:* {$visit->polyclinic?->name}\n"
+            ."👨‍⚕️ *Dokter Spesialis:* {$visit->doctor?->name}\n"
+            ."📋 *Nomor Antrean:* *{$queue->queue_code}*\n"
+            ."🚪 *Ruangan:* {$roomName}\n"
+            ."🆔 *No. RM Pasien:* {$patient?->medical_record_number}\n\n"
+            ."📲 *E-Tiket & QR Code Check-in Mandiri:*\n"
+            ."{$ticketUrl}\n\n"
+            ."_Tips: Harap hadir 15 menit lebih awal. Anda dapat langsung scan QR Code di atas pada mesin Kiosk lobi untuk check-in otomatis tanpa antre admisi._\n\n"
+            ."Bantuan & Reschedule Hubungi Hotline: (021) 8765-4321\n"
+            .'_Semoga lekas sehat walafiat!_';
+
+        try {
+            $result = $this->provider->sendMessage($targetPhone, $message);
+
+            return $result['success'] ?? true;
+        } catch (Throwable $e) {
+            Log::error('WA sendVisitReminder failed: '.$e->getMessage());
+
+            return false;
+        }
+    }
 }

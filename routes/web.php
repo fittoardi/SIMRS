@@ -6,6 +6,7 @@ use App\Http\Controllers\PatientCardController;
 use App\Http\Controllers\PharmacyEtiketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicInfoController;
+use App\Http\Controllers\SickLeaveCertificateController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\Doctor;
 use App\Models\Invoice;
@@ -57,6 +58,9 @@ Route::get('/booking-online', function () {
 Route::get('/tiket-antrean/{token}', function (string $token) {
     return view('public.ticket', compact('token'));
 })->name('public.ticket');
+
+// Verifikasi Keaslian Surat Keterangan Sakit (Anti-Pemalsuan Publik)
+Route::get('/verifikasi-surat/{token}', [SickLeaveCertificateController::class, 'verify'])->name('sick-leave.verify');
 
 // Halaman Edukasi & Informasi Publik RS
 Route::get('/tentang-kami', [PublicInfoController::class, 'about'])->name('public.about');
@@ -176,6 +180,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('patient.invoice-detail');
 
     Route::get('/kasir/kwitansi/{invoice}', BillingKwitansiController::class)->name('billing.kwitansi');
+
+    // Cetak Surat Keterangan Sakit (Surat Izin Istirahat Dokter)
+    Route::get('/surat-sakit/{certificate}', [SickLeaveCertificateController::class, 'show'])->name('sick-leave.print');
+
+    // Alias Riwayat Kunjungan Pasien
+    Route::get('/akun/riwayat', function () {
+        return redirect()->route('patient.queues');
+    })->name('patient.history');
 });
 
 require __DIR__.'/auth.php';
