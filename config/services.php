@@ -44,6 +44,7 @@ return [
     'whatsapp' => [
         'driver' => env('WHATSAPP_DRIVER', 'log'),
         'fonnte_token' => env('FONNTE_TOKEN'),
+        'sender_phone' => env('FONNTE_SENDER_PHONE', '085608543495'),
         'endpoint' => env('FONNTE_ENDPOINT', 'https://api.fonnte.com/send'),
     ],
 

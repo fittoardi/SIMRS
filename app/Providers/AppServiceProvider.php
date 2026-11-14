@@ -18,8 +18,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(WhatsAppProvider::class, function () {
-            $driver = config('services.whatsapp.driver', 'log');
             $token = config('services.whatsapp.fonnte_token');
+            $driver = config('services.whatsapp.driver', ! empty($token) ? 'fonnte' : 'log');
 
             if ($driver === 'fonnte' && ! empty($token)) {
                 return new FonnteProvider($token, config('services.whatsapp.endpoint', 'https://api.fonnte.com/send'));
