@@ -20,6 +20,7 @@ use App\Models\Polyclinic;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Queue;
+use App\Models\SickLeaveCertificate;
 use App\Models\User;
 use App\Models\Visit;
 use Carbon\Carbon;
@@ -180,7 +181,7 @@ class DemoTransactionSeeder extends Seeder
             ]
         );
 
-        MedicalRecord::updateOrCreate(
+        $mr2 = MedicalRecord::updateOrCreate(
             ['visit_id' => $visit2->id],
             [
                 'doctor_id' => $dokterSpesialis?->id,
@@ -196,6 +197,23 @@ class DemoTransactionSeeder extends Seeder
                 'icd10_code' => 'K30',
                 'icd10_description' => 'Dyspepsia',
                 'plan' => 'Edukasi diet lambung (hindari pedas/kopi/asam), terapi obat supresi asam lambung & prokinetik, kontrol bila keluhan berlanjut 1 minggu.',
+            ]
+        );
+
+        SickLeaveCertificate::updateOrCreate(
+            ['visit_id' => $visit2->id],
+            [
+                'medical_record_id' => $mr2->id,
+                'patient_id' => $istri->id,
+                'doctor_id' => $dokterSpesialis?->id,
+                'certificate_number' => 'SK/'.date('Ym').'/0001',
+                'days_count' => 3,
+                'start_date' => $today,
+                'end_date' => Carbon::parse($today)->addDays(2)->toDateString(),
+                'diagnosis_note' => 'K30 - Dyspepsia / Gastritis Akut',
+                'notes' => 'Pasien dianjurkan istirahat tirah baring di rumah, konsumsi makanan lunak, dan hindari beban kerja berat.',
+                'verification_token' => 'SKT-DEMO-RATNA-1234567890ABCDEF',
+                'issued_at' => now(),
             ]
         );
 
@@ -373,6 +391,38 @@ class DemoTransactionSeeder extends Seeder
                     'issuer' => 'BCA QRIS',
                     'acquirer' => 'Gopay',
                 ],
+            ]
+        );
+
+        // =========================================================================
+        // SCENARIO 6: Antrean Besok Siap untuk Pengingat WhatsApp H-1 (Scheduled Reminder)
+        // Pasien: Budi Santoso (Jadwal Besok di Poli Penyakit Dalam)
+        // =========================================================================
+        $tomorrow = Carbon::tomorrow()->toDateString();
+        $visitTomorrow = Visit::updateOrCreate(
+            ['visit_number' => 'VIS-DEMO-006'],
+            [
+                'patient_id' => $budi->id,
+                'doctor_id' => $dokterSpesialis?->id,
+                'polyclinic_id' => $poliDalam?->id,
+                'visit_date' => $tomorrow,
+                'visit_type' => 'outpatient',
+                'payment_type' => 'general',
+                'status' => VisitStatus::Registered,
+                'notes' => 'Kontrol H-1 jadwal poli spesialis demo reminder WhatsApp',
+            ]
+        );
+
+        Queue::updateOrCreate(
+            ['visit_id' => $visitTomorrow->id],
+            [
+                'doctor_schedule_id' => $scheduleDalam?->id,
+                'queue_number' => 3,
+                'queue_code' => 'DAL-'.date('ymd', strtotime($tomorrow)).'-003',
+                'qr_token' => 'QR-DEMO-BUDI-BESOK',
+                'estimated_time' => '09:30',
+                'status' => QueueStatus::Waiting,
+                'reminder_sent_at' => null,
             ]
         );
     }
