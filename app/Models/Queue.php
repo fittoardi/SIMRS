@@ -26,6 +26,7 @@ class Queue extends Model
         'called_at',
         'served_at',
         'completed_at',
+        'reminder_sent_at',
         'expires_at',
     ];
 

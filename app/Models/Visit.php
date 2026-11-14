@@ -90,6 +90,11 @@ class Visit extends Model
         return $this->hasMany(Prescription::class);
     }
 
+    public function sickLeaveCertificate(): HasOne
+    {
+        return $this->hasOne(SickLeaveCertificate::class);
+    }
+
     public function invoice(): HasOne
     {
         return $this->hasOne(Invoice::class)->latestOfMany();

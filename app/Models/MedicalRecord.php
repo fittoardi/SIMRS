@@ -68,4 +68,9 @@ class MedicalRecord extends Model
     {
         return $this->hasOne(Prescription::class, 'visit_id', 'visit_id');
     }
+
+    public function sickLeaveCertificate(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SickLeaveCertificate::class);
+    }
 }
