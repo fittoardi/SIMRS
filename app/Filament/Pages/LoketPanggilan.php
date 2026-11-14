@@ -27,7 +27,7 @@ class LoketPanggilan extends Page
 
     protected static ?string $title = 'Loket Panggilan Antrean & Admission';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected string $view = 'filament.pages.loket-panggilan';
 

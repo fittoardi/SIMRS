@@ -34,8 +34,8 @@ class Patient extends Model
 
     public static function generateMedicalRecordNumber(): string
     {
-        $prefix = 'RM-' . date('Ym') . '-';
-        $last = static::where('medical_record_number', 'like', $prefix . '%')
+        $prefix = 'RM-'.date('Ym').'-';
+        $last = static::where('medical_record_number', 'like', $prefix.'%')
             ->orderByDesc('id')
             ->value('medical_record_number');
 
@@ -45,7 +45,7 @@ class Patient extends Model
             $nextNumber = '0001';
         }
 
-        return $prefix . $nextNumber;
+        return $prefix.$nextNumber;
     }
 
     protected function casts(): array
@@ -68,5 +68,10 @@ class Patient extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function familyMembers(): HasMany
+    {
+        return $this->hasMany(PatientFamilyMember::class);
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Enums\QueueStatus;
 use App\Http\Controllers\BillingKwitansiController;
+use App\Http\Controllers\PatientCardController;
 use App\Http\Controllers\PharmacyEtiketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicInfoController;
@@ -148,6 +149,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Cetak Etiket Farmasi
     Route::get('/farmasi/etiket/{prescription}', PharmacyEtiketController::class)->name('pharmacy.etiket');
+
+    // Cetak Kartu Berobat Pasien (ID Card / Thermal)
+    Route::get('/pasien/kartu/{patient}', PatientCardController::class)->name('patient.card');
 
     // Tagihan & Kasir Pasien
     Route::get('/akun/tagihan', function () {

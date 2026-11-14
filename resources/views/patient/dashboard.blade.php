@@ -126,11 +126,16 @@
                 <div class="pt-6 border-t border-teal-600/50 mt-6 flex flex-wrap items-center justify-between gap-3">
                     <span class="text-xs text-teal-200">Keluarga Terdaftar: <strong>{{ $familyCount ?? 0 }} Anggota</strong></span>
                     <div class="flex items-center space-x-2">
+                        @if($patient)
+                            <a href="{{ route('patient.card', $patient->id) }}" target="_blank" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 transition text-emerald-200 flex items-center space-x-1">
+                                <span>🖨️ Cetak Kartu</span>
+                            </a>
+                        @endif
                         <a href="{{ route('patient.profile') }}" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 transition text-white">
-                            Edit Profil Pasien
+                            Edit Profil
                         </a>
                         <a href="{{ route('patient.family') }}" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-teal-900 hover:bg-teal-50 transition">
-                            Kelola Keluarga
+                            Keluarga
                         </a>
                     </div>
                 </div>
