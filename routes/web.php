@@ -6,6 +6,7 @@ use App\Http\Controllers\PatientCardController;
 use App\Http\Controllers\PharmacyEtiketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicInfoController;
+use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Models\Doctor;
 use App\Models\Invoice;
 use App\Models\Polyclinic;
@@ -75,6 +76,9 @@ Route::get('/sitemap.xml', function () {
     return response($content, 200)
         ->header('Content-Type', 'application/xml');
 })->name('seo.sitemap');
+
+// Webhook Notifikasi Pembayaran (Midtrans / Xendit — Tanpa CSRF)
+Route::post('/webhooks/payment', PaymentWebhookController::class)->name('webhooks.payment');
 
 // Area Pasien Terautentikasi (/akun)
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -7,8 +7,10 @@ use App\Models\DoctorSchedule;
 use App\Models\Patient;
 use App\Models\Polyclinic;
 use App\Services\QueueBookingService;
+use App\Services\WhatsAppNotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use RuntimeException;
 
@@ -219,6 +221,13 @@ class GuestBooking extends Component
                 'insurance_card_number' => $this->insuranceCardNumber,
                 'notes' => $this->complaint ?: null,
             ]);
+
+            // Kirim notifikasi WhatsApp e-tiket & konfirmasi pendaftaran guest
+            try {
+                app(WhatsAppNotificationService::class)->sendBookingConfirmation($result['visit'], $result['queue']);
+            } catch (\Throwable $e) {
+                Log::warning('Gagal kirim notifikasi WhatsApp guest booking: '.$e->getMessage());
+            }
         } catch (RuntimeException $e) {
             session()->flash('error', $e->getMessage());
             $this->currentStep = 3;
@@ -273,4 +282,3 @@ class GuestBooking extends Component
         ]);
     }
 }
-

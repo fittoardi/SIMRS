@@ -10,11 +10,13 @@ use App\Models\Patient;
 use App\Models\Polyclinic;
 use App\Models\Queue;
 use App\Models\Visit;
+use App\Services\WhatsAppNotificationService;
 use BackedEnum;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Log;
 use UnitEnum;
 
 class LoketPanggilan extends Page
@@ -133,6 +135,12 @@ class LoketPanggilan extends Page
             'called_at' => now(),
             'call_count' => ($queue->call_count ?? 0) + 1,
         ]);
+
+        try {
+            app(WhatsAppNotificationService::class)->sendQueueCalled($queue);
+        } catch (\Throwable $e) {
+            Log::warning('Gagal kirim notifikasi WhatsApp antrean: '.$e->getMessage());
+        }
 
         Notification::make()
             ->success()

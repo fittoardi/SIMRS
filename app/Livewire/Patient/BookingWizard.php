@@ -11,10 +11,12 @@ use App\Models\PatientFamilyMember;
 use App\Models\Polyclinic;
 use App\Models\Queue;
 use App\Models\Visit;
+use App\Services\WhatsAppNotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -258,6 +260,16 @@ class BookingWizard extends Component
 
                 return $newVisit;
             });
+
+            // Kirim notifikasi WhatsApp e-tiket & konfirmasi pendaftaran
+            $queue = Queue::where('visit_id', $visit->id)->first();
+            if ($queue) {
+                try {
+                    app(WhatsAppNotificationService::class)->sendBookingConfirmation($visit, $queue);
+                } catch (\Throwable $e) {
+                    Log::warning('Gagal kirim notifikasi WhatsApp booking: '.$e->getMessage());
+                }
+            }
 
             session()->flash('success', 'Pendaftaran antrean berhasil!');
             $this->redirect(route('patient.ticket', $visit->id), navigate: true);

@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'is_production' => (bool) env('MIDTRANS_IS_PRODUCTION', false),
+    ],
+
+    'whatsapp' => [
+        'driver' => env('WHATSAPP_DRIVER', 'log'),
+        'fonnte_token' => env('FONNTE_TOKEN'),
+        'endpoint' => env('FONNTE_ENDPOINT', 'https://api.fonnte.com/send'),
+    ],
+
 ];

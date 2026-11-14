@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Prescriptions\Tables;
 use App\Enums\PrescriptionStatus;
 use App\Enums\VisitStatus;
 use App\Models\Medicine;
+use App\Services\WhatsAppNotificationService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -15,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PrescriptionsTable
 {
@@ -98,10 +100,16 @@ class PrescriptionsTable
                             'status' => PrescriptionStatus::Ready,
                         ]);
 
+                        try {
+                            app(WhatsAppNotificationService::class)->sendPrescriptionReady($record);
+                        } catch (\Throwable $e) {
+                            Log::warning('Gagal kirim notifikasi WhatsApp resep siap: '.$e->getMessage());
+                        }
+
                         Notification::make()
                             ->success()
                             ->title('Obat Siap Diambil')
-                            ->body("Obat untuk pasien {$record->visit?->patient?->name} siap diambil di loket farmasi.")
+                            ->body("Obat untuk pasien {$record->visit?->patient?->name} siap diambil di loket farmasi. Notifikasi WhatsApp telah dikirim.")
                             ->send();
                     }),
 

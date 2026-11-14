@@ -5,14 +5,21 @@ namespace App\Services;
 use App\Enums\PaymentStatus;
 use App\Enums\VisitStatus;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
 use App\Models\Payment;
 use App\Models\Visit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Throwable;
 
 class BillingService
 {
+    public function __construct(
+        protected ?WhatsAppNotificationService $waService = null
+    ) {
+        $this->waService = $waService ?? app(WhatsAppNotificationService::class);
+    }
+
     /**
      * Buat invoice otomatis dari rincian layanan kunjungan (konsultasi, tindakan RME, resep obat, & kamar).
      */
@@ -131,7 +138,7 @@ class BillingService
      */
     public function payWithCash(Invoice $invoice, float $amountTendered, ?string $notes = null, ?int $cashierUserId = null): array
     {
-        return DB::transaction(function () use ($invoice, $amountTendered, $notes, $cashierUserId): array {
+        $result = DB::transaction(function () use ($invoice, $amountTendered, $notes, $cashierUserId): array {
             $invoice->refresh();
 
             if ($invoice->status === PaymentStatus::Paid) {
@@ -140,7 +147,7 @@ class BillingService
 
             if ($amountTendered < (float) $invoice->total) {
                 $kurang = (float) $invoice->total - $amountTendered;
-                throw new InvalidArgumentException('Nominal uang diterima kurang dari total tagihan (Kekurangan: Rp ' . number_format($kurang, 0, ',', '.') . ').');
+                throw new InvalidArgumentException('Nominal uang diterima kurang dari total tagihan (Kekurangan: Rp '.number_format($kurang, 0, ',', '.').').');
             }
 
             $change = $amountTendered - (float) $invoice->total;
@@ -148,7 +155,7 @@ class BillingService
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
                 'provider' => 'cash',
-                'provider_ref' => 'CASH-' . date('YmdHis') . '-' . str_pad((string) $invoice->id, 4, '0', STR_PAD_LEFT),
+                'provider_ref' => 'CASH-'.date('YmdHis').'-'.str_pad((string) $invoice->id, 4, '0', STR_PAD_LEFT),
                 'method' => 'cash',
                 'amount' => $invoice->total,
                 'status' => PaymentStatus::Paid,
@@ -176,23 +183,32 @@ class BillingService
                 'change' => $change,
             ];
         });
+
+        // Kirim Notifikasi WhatsApp Kwitansi Lunas ke Pasien
+        try {
+            $this->waService->sendPaymentSuccess($invoice, $result['payment']);
+        } catch (Throwable $e) {
+            Log::warning('Gagal kirim notifikasi WhatsApp pembayaran tunai: '.$e->getMessage());
+        }
+
+        return $result;
     }
 
     /**
      * Proses pembayaran non-tunai / online gateway (QRIS, Virtual Account, E-Wallet).
      *
-     * @param array<string, mixed> $extraPayload
+     * @param  array<string, mixed>  $extraPayload
      */
     public function payWithOnlineGateway(Invoice $invoice, string $method = 'qris', ?string $providerRef = null, array $extraPayload = []): Payment
     {
-        return DB::transaction(function () use ($invoice, $method, $providerRef, $extraPayload): Payment {
+        $payment = DB::transaction(function () use ($invoice, $method, $providerRef, $extraPayload): Payment {
             $invoice->refresh();
 
             if ($invoice->status === PaymentStatus::Paid) {
                 throw new InvalidArgumentException("Tagihan {$invoice->number} sudah berstatus LUNAS.");
             }
 
-            $ref = $providerRef ?: ('MID-' . strtoupper($method) . '-' . date('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(3))));
+            $ref = $providerRef ?: ('MID-'.strtoupper($method).'-'.date('YmdHis').'-'.strtoupper(bin2hex(random_bytes(3))));
 
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
@@ -220,6 +236,14 @@ class BillingService
 
             return $payment;
         });
+
+        // Kirim Notifikasi WhatsApp Kwitansi Lunas ke Pasien
+        try {
+            $this->waService->sendPaymentSuccess($invoice, $payment);
+        } catch (Throwable $e) {
+            Log::warning('Gagal kirim notifikasi WhatsApp pembayaran online: '.$e->getMessage());
+        }
+
+        return $payment;
     }
 }
-

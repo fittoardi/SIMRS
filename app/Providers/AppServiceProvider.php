@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Integrations\WhatsApp\FonnteProvider;
+use App\Integrations\WhatsApp\LogWhatsAppProvider;
+use App\Integrations\WhatsApp\WhatsAppProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +17,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(WhatsAppProvider::class, function () {
+            $driver = config('services.whatsapp.driver', 'log');
+            $token = config('services.whatsapp.fonnte_token');
+
+            if ($driver === 'fonnte' && ! empty($token)) {
+                return new FonnteProvider($token, config('services.whatsapp.endpoint', 'https://api.fonnte.com/send'));
+            }
+
+            return new LogWhatsAppProvider;
+        });
     }
 
     /**
