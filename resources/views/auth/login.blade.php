@@ -84,7 +84,7 @@
             <!-- Session Status -->
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+            <form method="POST" action="{{ route('login') }}" class="space-y-5" x-data="{ showPassword: false, fillDemo(email) { document.getElementById('email').value = email; document.getElementById('password').value = 'password'; } }">
                 @csrf
 
                 <!-- Email Address -->
@@ -114,7 +114,7 @@
                 </div>
 
                 <!-- Password with Alpine Show/Hide Toggle -->
-                <div x-data="{ showPassword: false }">
+                <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                             Kata Sandi
@@ -174,6 +174,33 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                     </svg>
                 </button>
+
+                <!-- Demo Account Quick Selector -->
+                <div class="mt-4 p-3.5 rounded-2xl bg-teal-50/70 dark:bg-slate-800/80 border border-teal-200/70 dark:border-slate-700" x-data="{ openDemo: false }">
+                    <div class="flex items-center justify-between cursor-pointer" @click="openDemo = !openDemo">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm">🚀</span>
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Akun Uji Coba / Demo Sistem</span>
+                        </div>
+                        <span class="text-[11px] font-semibold text-teal-600 dark:text-teal-400 hover:underline" x-text="openDemo ? 'Tutup ▲' : 'Pilihan Akun ▼'"></span>
+                    </div>
+
+                    <div x-show="openDemo" x-cloak class="mt-3 pt-3 border-t border-teal-200/60 dark:border-slate-700 space-y-2 text-xs">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Klik tombol di bawah untuk otomatis mengisi form (Kata Sandi: <code class="font-bold text-teal-700 dark:text-teal-300">password</code>):
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            <button type="button" @click="fillDemo('pasien@aisyahmedika.id')" class="text-left p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-teal-500 hover:bg-teal-50/50 transition">
+                                <p class="font-bold text-slate-900 dark:text-white text-[11px]">👤 Pasien Demo</p>
+                                <p class="text-[10px] text-slate-500 truncate">pasien@aisyahmedika.id</p>
+                            </button>
+                            <a href="/admin" target="_blank" class="text-left p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-teal-500 hover:bg-teal-50/50 transition block">
+                                <p class="font-bold text-teal-600 dark:text-teal-400 text-[11px]">🔐 Panel Staf RS (/admin) ↗</p>
+                                <p class="text-[10px] text-slate-500 truncate">Dokter, Kasir, Farmasi, Admin</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </form>
 
             <!-- Register Prompt -->
